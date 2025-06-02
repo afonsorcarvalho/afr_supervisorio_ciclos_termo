@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Tipos de Ciclo Padrão para Autoclave Vapor -->
+        <record id="cycle_type_termo" model="afr.cycle.type">
+            <field name="name">Termodesinfecção</field>
+            <field name="code">TERMO</field>
+  
+            <field name="description">Ciclo de Termodesinfectora a 85°C</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo> 
