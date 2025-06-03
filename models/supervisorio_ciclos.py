@@ -87,26 +87,37 @@ class SupervisorioCiclosTermo(models.Model):
             return ciclo
         #ciclo existe, atualiza ciclo
         #verificando se ciclo finalizou
-        # procurando no body o valor de 'CICLO FINALIZADO'
+        
         
         values['state'] = 'em_andamento'
         if body['state'] == 'concluido':
-            
             values['state'] = 'concluido'
         if body['state'] == 'abortado':
-
             values['state'] = 'abortado'
-        # Obtém a data de finalização do ciclo e adiciona 3 horas para compensar o fuso horário
+        
         if body['state'] == 'em_andamento':
-            
             return self.write(values)
         
-        _logger.debug(f"ultima data_hora: {body['data'][-1][0]}")
-        data_fim =body['data'][-1][0]
-        data_fim_ajustada = data_fim + timedelta(hours=3)
-        values['end_date'] = data_fim_ajustada          
-
+        try:
+            _logger.debug(f"body: {body['fase']}")
+            final_ciclo = list(filter(lambda x: x[1] == 'FINAL  DE CICLO', body['fase']))
+            _logger.debug(f"final_ciclo: {final_ciclo}")
+            if final_ciclo:
+                values['end_date'] = final_ciclo[0][0] + timedelta(hours=3)
+                return self.write(values)
             
+        
+            _logger.debug(f"ultima data_hora: {body['data'][-1][0]}")
+            data_fim =body['data'][-1][0]
+            data_fim_ajustada = data_fim + timedelta(hours=3)
+            values['end_date'] = data_fim_ajustada     
+
+        except Exception as e:
+            _logger.error(f"Erro ao obter data de finalização do ciclo: {e}")
+            values['end_date'] = self.start_date 
+            values['state'] = 'erro'
+
+
         return self.write(values)
         
     def data_hora_to_datetime(self, data, hora):
